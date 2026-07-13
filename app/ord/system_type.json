@@ -1,0 +1,44 @@
+{
+  "openResourceDiscovery": "1.14",
+  "$schema": "https://open-resource-discovery.org/spec-v1/interfaces/Document.schema.json",
+  "perspective": "system-type",
+  "policyLevels": ["sap:ai:v1"],
+  "describedSystemVersion": {
+    "version": "1.0.0"
+  },
+  "description": "ORD document for tender-synopsis-agent (system-type perspective)",
+  "products": [],
+  "packages": [
+    {
+      "ordId": "sap.pps:package:tender-synopsis-agent:v1",
+      "title": "Tender Synopsis Agent Package",
+      "shortDescription": "Package for Tender Synopsis Agent resources",
+      "description": "An AI agent that fetches SAP PPS Sourcing Projects, detects country-specific portal requirements, generates a compliant tender synopsis, and supports human review before publication.",
+      "version": "1.0.0",
+      "policyLevels": ["sap:ai:v1"],
+      "vendor": "sap:vendor:SAP:",
+      "partOfProducts": []
+    }
+  ],
+  "agents": [
+    {
+      "ordId": "sap.pps:agent:tender-synopsis-agent:v1",
+      "localId": "tender-synopsis-agent",
+      "title": "Tender Synopsis Agent",
+      "shortDescription": "An AI agent that fetches SAP PPS Sourcing Projects, detects country-specific portal requirements, generates a compliant tender synopsis, and supports human review before publication.",
+      "description": "The Tender Synopsis Agent automates the creation of country-compliant tender notices from SAP PPS Sourcing Projects. It detects the procuring entity country via CompanyCode, applies the correct portal format (eProcure, SAM.gov, TED, Etimad), generates a structured synopsis using Claude AI, and supports human review before publication via the A2A protocol.",
+      "version": "1.0.0",
+      "visibility": "internal",
+      "releaseStatus": "active",
+      "lastUpdate": "2026-07-09T15:35:41Z",
+      "partOfPackage": "sap.pps:package:tender-synopsis-agent:v1",
+      "partOfProducts": [],
+      "labels": {
+        "interactionMode": ["conversational"]
+      },
+      "tags": ["sap", "ai-agent", "a2a"],
+      "integrationDependencies": []
+    }
+  ],
+  "integrationDependencies": []
+}

@@ -1,0 +1,36 @@
+meta {
+  name: 06 - Edit Field (Turn 2)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base_url}}/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "edit-1",
+    "params": {
+      "message": {
+        "messageId": "msg-004",
+        "contextId": "{{context_id}}",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "edit Geschätzter Auftragswert 200.00 EUR"
+          }
+        ]
+      }
+    }
+  }
+}

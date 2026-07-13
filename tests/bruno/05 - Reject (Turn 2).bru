@@ -1,0 +1,36 @@
+meta {
+  name: 05 - Reject (Turn 2)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "reject-1",
+    "params": {
+      "message": {
+        "messageId": "msg-003",
+        "contextId": "{{context_id}}",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "reject"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+sap-cloud-sdk~=0.25
+litellm==1.89.3
+langchain==1.3.10
+langchain-core==1.4.8
+langchain-litellm==0.7.0
+langgraph==1.2.6
+a2a-sdk[http-server]==0.3.22
+uvicorn==0.40.0
+httpx==0.28.1
+anthropic
+python-docx
+python-dotenv

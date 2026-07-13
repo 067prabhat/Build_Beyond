@@ -1,0 +1,24 @@
+apiVersion: workload.appfnd.sap/v1
+kind: Agent
+metadata:
+  name: tender-synopsis-agent
+  namespace: tender-synopsis-agent
+spec:
+  container:
+    buildPath: .
+    port: 9000
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "50m"
+    limits:
+      memory: "512Mi"
+      cpu: "100m"
+  models:
+    - executableId: aws-bedrock
+      name: anthropic--claude-4.5-sonnet
+      version: latest
+  requires:
+    - name: pps-destination
+      service: destination
+      plan: lite

@@ -1,0 +1,44 @@
+meta {
+  name: 01 - Get Agent Card
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/.well-known/agent-card.json
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (!data) return;
+
+  console.log("════════════════════════════════════════════════════");
+  console.log("  AGENT CARD");
+  console.log("════════════════════════════════════════════════════");
+  console.log("  Name        : " + data.name);
+  console.log("  Version     : " + data.version);
+  console.log("  Protocol    : " + data.protocolVersion);
+  console.log("  URL         : " + data.url);
+  console.log("  Streaming   : " + data.capabilities?.streaming);
+  console.log("");
+  console.log("  Skills:");
+  (data.skills || []).forEach(s => {
+    console.log("    - " + s.id + " : " + s.description.slice(0, 80));
+    console.log("      Tags: " + s.tags.join(", "));
+  });
+  console.log("");
+  console.log("  Examples:");
+  const skill = data.skills?.[0];
+  (skill?.examples || []).forEach(e => console.log("    > " + e));
+  console.log("════════════════════════════════════════════════════");
+
+  test("Agent is running", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Agent name is correct", function() {
+    expect(data.name).to.equal("Tender Synopsis Agent");
+  });
+}

@@ -1,0 +1,75 @@
+meta {
+  name: 04 - Approve (Turn 2)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "approve-1",
+    "params": {
+      "message": {
+        "messageId": "msg-002",
+        "contextId": "{{context_id}}",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "approve"
+          }
+        ]
+      }
+    }
+  }
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (!data || !data.result) {
+    console.log("ERROR: No result in response");
+    return;
+  }
+
+  const result = data.result;
+  const state = result.status.state;
+  const artifacts = result.artifacts || [];
+
+  console.log("════════════════════════════════════════════════════");
+  console.log("  APPROVAL RESULT");
+  console.log("════════════════════════════════════════════════════");
+  console.log("  Task State : " + state);
+
+  if (artifacts.length > 0) {
+    const text = artifacts[0].parts?.[0]?.text || "";
+    console.log("");
+    console.log(text);
+  } else {
+    const msg = result.status.message?.parts?.[0]?.text || "";
+    console.log("  Message    : " + msg.slice(0, 200));
+  }
+  console.log("════════════════════════════════════════════════════");
+
+  test("HTTP 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Task completed after approval", function() {
+    expect(state).to.equal("completed");
+  });
+
+  test("Artifact returned", function() {
+    expect(artifacts.length).to.be.greaterThan(0);
+  });
+}

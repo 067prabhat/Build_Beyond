@@ -1,0 +1,77 @@
+meta {
+  name: 08 - Generate USA Format
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "usa-1",
+    "params": {
+      "message": {
+        "messageId": "msg-usa-001",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "Generate a tender synopsis for sourcing project {{sp_id}} for USA SAM.gov format"
+          }
+        ]
+      }
+    }
+  }
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (!data || !data.result) {
+    console.log("ERROR: No result in response");
+    return;
+  }
+
+  const result = data.result;
+  bru.setVar("context_id", result.contextId);
+
+  const state = result.status.state;
+  const text = result.status.message?.parts?.[0]?.text || "";
+
+  console.log("════════════════════════════════════════════════════");
+  console.log("  TENDER SYNOPSIS — USA (SAM.gov | FAR/DFARS)");
+  console.log("════════════════════════════════════════════════════");
+  console.log("  Task State  : " + state);
+  console.log("  Context ID  : " + result.contextId);
+  console.log("════════════════════════════════════════════════════");
+  console.log("");
+  console.log(text);
+  console.log("");
+  console.log("  Next: Run '04 - Approve' to publish");
+  console.log("════════════════════════════════════════════════════");
+
+  test("HTTP 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("State is input-required (HITL active)", function() {
+    expect(state).to.equal("input-required");
+  });
+
+  test("Synopsis contains SAM.gov portal label", function() {
+    expect(text).to.include("SAM.gov");
+  });
+
+  test("context_id captured", function() {
+    expect(result.contextId).to.be.a("string");
+  });
+}

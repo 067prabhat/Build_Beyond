@@ -1,0 +1,40 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Credentials — NEVER commit these ─────────────────────────────────────────
+.env
+.env.*
+app/.env.local
+app/.env
+*.env
+
+# ── Generated output documents ────────────────────────────────────────────────
+output_docs/
+TenderSynopsis_*.docx
+*.docx
+
+# Testing artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Misc
+*.log
+.DS_Store
+.claude/
+.context/
+ord-dependencies.json
