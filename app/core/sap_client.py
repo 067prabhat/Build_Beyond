@@ -1,15 +1,25 @@
 """
 SAP PPS connectivity — OData V4 fetch for Sourcing Projects.
 Reads credentials from .env.local (A2A project) or environment variables.
+
+Retry & Recovery:
+  - Configurable retries with exponential backoff
+  - In-memory cache fallback when SAP is unreachable
+  - Auto-fallback to mock data when cache is empty
 """
 
 import base64
 import json
+import logging
 import os
 import ssl
+import time
 import urllib.request
+import urllib.error
 import urllib.parse
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 # ── Load .env.local from app/ directory ──────────────────────────────────────
@@ -40,6 +50,14 @@ ODATA_BASE = (
     f"{PPS_SYSTEM_URL}/sap/opu/odata4/sap/ui_sourcingproject_manage_2"
     f"/srvd/sap/ui_sourcingproject_manage_2/0001"
 )
+
+# ── Retry configuration ───────────────────────────────────────────────────────
+SAP_MAX_RETRIES  = int(os.environ.get("SAP_MAX_RETRIES", "3"))
+SAP_TIMEOUT      = int(os.environ.get("SAP_TIMEOUT_SEC", "15"))   # reduced from 30
+SAP_BACKOFF_BASE = float(os.environ.get("SAP_BACKOFF_BASE", "2")) # seconds: 2, 4, 8
+
+# ── In-memory cache: sp_id -> tender_data (survives transient SAP failures) ──
+_tender_cache: dict = {}
 
 
 # ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -134,16 +152,25 @@ def _mock_tender_data(sourcing_project_id: str) -> dict:
     }
 
 
-# ── Main fetch function ───────────────────────────────────────────────────────
+# ── Main fetch function with retry & recovery ─────────────────────────────────
 
 def fetch_tender_from_sap(sourcing_project_id: str, use_mock: bool = False) -> dict:
     """
     Fetch Sourcing Project from SAP PPS EMT 601 OData V4.
-    Falls back to mock data when use_mock=True or credentials are not set.
+
+    Recovery strategy (3 levels):
+      Level 1: Live SAP fetch with retry + exponential backoff
+      Level 2: Return cached data if SAP is unreachable
+      Level 3: Fall back to mock data if cache is empty
+
+    Config via env vars:
+      SAP_MAX_RETRIES   (default: 3)
+      SAP_TIMEOUT_SEC   (default: 15)
+      SAP_BACKOFF_BASE  (default: 2.0 seconds)
     """
     if use_mock or not PPS_USER.strip() or not PPS_PASSWORD.strip():
         reason = "--mock flag" if use_mock else "SAP credentials not set"
-        print(f"[WARN] {reason}. Using mock data for demo.")
+        logger.warning(f"[SAP] {reason}. Using mock data.")
         return _mock_tender_data(sourcing_project_id)
 
     params = urllib.parse.urlencode({
@@ -151,34 +178,76 @@ def fetch_tender_from_sap(sourcing_project_id: str, use_mock: bool = False) -> d
         "$expand": "_NoteBasic",
         "sap-client": PPS_CLIENT,
     })
-
     url = f"{ODATA_BASE}/SourcingProject?{params}"
-    print(f"[INFO] Fetching from SAP PPS EMT 601: {url}")
+    logger.info(f"[SAP] Fetching SP {sourcing_project_id} from EMT 601")
 
-    opener = _build_opener()
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", _auth_header())
-    req.add_header("Accept", "application/json")
+    last_error = None
 
-    try:
-        response = opener.open(req, timeout=30)
-        raw_bytes = response.read()
+    for attempt in range(1, SAP_MAX_RETRIES + 1):
         try:
-            payload = json.loads(raw_bytes.decode("utf-8"))
-        except UnicodeDecodeError:
-            payload = json.loads(raw_bytes.decode("latin-1"))
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"SAP OData error {e.code}: {body[:400]}") from e
+            opener = _build_opener()
+            req = urllib.request.Request(url)
+            req.add_header("Authorization", _auth_header())
+            req.add_header("Accept", "application/json")
 
-    records = payload.get("value", [])
-    if not records:
-        raise RuntimeError(
-            f"No Sourcing Project found for ID '{sourcing_project_id}' in EMT 601 client {PPS_CLIENT}."
+            response = opener.open(req, timeout=SAP_TIMEOUT)
+            raw_bytes = response.read()
+            try:
+                payload = json.loads(raw_bytes.decode("utf-8"))
+            except UnicodeDecodeError:
+                payload = json.loads(raw_bytes.decode("latin-1"))
+
+            records = payload.get("value", [])
+            if not records:
+                raise RuntimeError(
+                    f"No Sourcing Project found for ID '{sourcing_project_id}' "
+                    f"in EMT 601 client {PPS_CLIENT}."
+                )
+
+            result = _parse_sp_response(records[0], sourcing_project_id)
+
+            # Cache on success for future fallback
+            _tender_cache[sourcing_project_id] = result
+            logger.info(f"[SAP] Fetched: {result.get('SourcingProjectName')} (attempt {attempt})")
+            return result
+
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", errors="replace")
+            # 4xx errors are not retryable (bad request / auth / not found)
+            if 400 <= e.code < 500:
+                raise RuntimeError(f"SAP OData error {e.code}: {body[:300]}") from e
+            last_error = RuntimeError(f"SAP OData error {e.code}: {body[:300]}")
+            logger.warning(f"[SAP] Attempt {attempt}/{SAP_MAX_RETRIES} failed: HTTP {e.code}")
+
+        except Exception as e:
+            last_error = e
+            logger.warning(f"[SAP] Attempt {attempt}/{SAP_MAX_RETRIES} failed: {type(e).__name__}: {e}")
+
+        # Exponential backoff before next retry (skip on last attempt)
+        if attempt < SAP_MAX_RETRIES:
+            wait = SAP_BACKOFF_BASE ** attempt
+            logger.info(f"[SAP] Retrying in {wait:.0f}s...")
+            time.sleep(wait)
+
+    # All retries exhausted — try cache
+    if sourcing_project_id in _tender_cache:
+        logger.warning(
+            f"[SAP] All {SAP_MAX_RETRIES} retries failed. "
+            f"Serving cached data for SP {sourcing_project_id}. "
+            f"Last error: {last_error}"
         )
+        return _tender_cache[sourcing_project_id]
 
-    sp = records[0]
+    # Cache empty — fall back to mock with clear warning
+    logger.error(
+        f"[SAP] SAP unreachable and no cache available for SP {sourcing_project_id}. "
+        f"Falling back to mock data. Last error: {last_error}"
+    )
+    return _mock_tender_data(sourcing_project_id)
 
+
+def _parse_sp_response(sp: dict, sourcing_project_id: str) -> dict:
+    """Extract and normalise the 26 fields from a raw SourcingProject OData record."""
     notes = sp.get("_NoteBasic", {})
     if isinstance(notes, dict):
         notes = notes.get("value", [])
