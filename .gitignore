@@ -38,3 +38,7 @@ htmlcov/
 .claude/
 .context/
 ord-dependencies.json
+
+# Documentation — pushed only at final release
+PROJECT_TRACKER.md
+ARCHITECTURE.md
