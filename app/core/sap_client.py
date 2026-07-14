@@ -113,42 +113,40 @@ def _fetch_company_code_country(company_code: str) -> str:
 # ── Mock data (fallback when SAP is unreachable) ──────────────────────────────
 
 def _mock_tender_data(sourcing_project_id: str) -> dict:
+    """
+    Returns neutral mock data when SAP is unreachable.
+    Currency is USD (not SAR/INR/EUR) to avoid false country detection.
+    CompanyCodeCountry is empty so user must select country manually in UI.
+    Shows clearly this is offline/demo data.
+    """
     return {
         "SourcingProject":              sourcing_project_id,
         "SourcingProjectVersion":       "1",
-        "SourcingProjectName":          "Supply and Installation of Smart Street Lighting Systems",
-        "SourcingProjectType":          "Public Tender",
-        "LifecycleStatus":              "Published",
-        "ApprovalStatus":               "Approved",
-        "ProcedureType":                "Open",
-        "BidSubmissionDeadline":        "2026-09-15T14:00:00",
-        "BidOpeningDateTime":           "2026-09-16T10:00:00",
-        "ProjectStartDateTime":         "2026-07-04T08:00:00",
-        "SupplierRegistrationDeadline": "2026-08-31T23:59:00",
-        "TotalTargetAmount":            "45000000",
-        "DocumentCurrency":             "SAR",
-        "PurchasingOrganization":       "Ministry of Public Works",
-        "PurchasingGroup":              "Infrastructure Procurement",
-        "PurchasingCategory":           "Infrastructure Works",
-        "MaterialGroup":                "Electrical Equipment",
+        "SourcingProjectName":          f"[OFFLINE] Sourcing Project {sourcing_project_id}",
+        "SourcingProjectType":          "PPS Sourcing Project",
+        "LifecycleStatus":              "In Preparation",
+        "ApprovalStatus":               "",
+        "ProcedureType":                "Restricted",
+        "BidSubmissionDeadline":        "2026-09-30T12:00:00",
+        "BidOpeningDateTime":           "2026-10-01T10:00:00",
+        "ProjectStartDateTime":         "2026-08-01T08:00:00",
+        "SupplierRegistrationDeadline": "2026-09-15T23:59:00",
+        "TotalTargetAmount":            "100000",
+        "DocumentCurrency":             "USD",
+        "PurchasingOrganization":       "Demo Organization",
+        "PurchasingGroup":              "Demo Buyer Group",
+        "PurchasingCategory":           "",
+        "MaterialGroup":                "General Goods",
         "ContractValidityStart":        "2026-11-01",
-        "ContractValidityEnd":          "2029-10-31",
-        "ExternalReference":            "EXT-2026-SPL-0042",
-        "CreatedBy":                    "PROC_OFFICER_01",
-        "CreationDateTime":             "2026-06-20T10:30:00",
+        "ContractValidityEnd":          "2027-10-31",
+        "ExternalReference":            "",
+        "CreatedBy":                    "DEMO_USER",
+        "CreationDateTime":             "2026-07-14T08:00:00",
         "CompanyCode":                  "",
-        "CompanyCodeCountry":           "SA",
-        "SynopsisNotes": (
-            "Supply, deliver, install, test and commission 5,000 units of solar-powered "
-            "smart street lighting systems across municipalities in the Northern Province. "
-            "Scope includes civil works, electrical cabling, a central monitoring and control "
-            "system, and a 3-year maintenance contract post-commissioning.\n\n"
-            "Eligibility: Bidders must be registered with the National Contractors Registration Board (NCRB) "
-            "with minimum Grade 5 classification. Minimum annual turnover of SAR 10 million for "
-            "last 3 financial years required. Joint ventures permitted with lead partner holding "
-            "at least 51% share. ISO 9001:2015 certification mandatory."
-        ),
-        "GeneralNotes": "",
+        "CompanyCodeCountry":           "",   # empty → forces manual country selection
+        "SynopsisNotes":                "",
+        "GeneralNotes":                 f"[SAP OFFLINE] Live data unavailable for SP {sourcing_project_id}. "
+                                        f"This is placeholder data. Please select the correct country/portal manually.",
     }
 
 
@@ -158,10 +156,10 @@ def fetch_tender_from_sap(sourcing_project_id: str, use_mock: bool = False) -> d
     """
     Fetch Sourcing Project from SAP PPS EMT 601 OData V4.
 
-    Recovery strategy (3 levels):
+    Recovery strategy (2 levels):
       Level 1: Live SAP fetch with retry + exponential backoff
-      Level 2: Return cached data if SAP is unreachable
-      Level 3: Fall back to mock data if cache is empty
+      Level 2: Return cached data if SAP is unreachable (same SP fetched before)
+      No mock fallback — raises SAPUnavailableError with a clear message instead
 
     Config via env vars:
       SAP_MAX_RETRIES   (default: 3)
@@ -229,7 +227,7 @@ def fetch_tender_from_sap(sourcing_project_id: str, use_mock: bool = False) -> d
             logger.info(f"[SAP] Retrying in {wait:.0f}s...")
             time.sleep(wait)
 
-    # All retries exhausted — try cache
+    # All retries exhausted — try cache (same SP fetched successfully before)
     if sourcing_project_id in _tender_cache:
         logger.warning(
             f"[SAP] All {SAP_MAX_RETRIES} retries failed. "
@@ -238,12 +236,13 @@ def fetch_tender_from_sap(sourcing_project_id: str, use_mock: bool = False) -> d
         )
         return _tender_cache[sourcing_project_id]
 
-    # Cache empty — fall back to mock with clear warning
-    logger.error(
-        f"[SAP] SAP unreachable and no cache available for SP {sourcing_project_id}. "
-        f"Falling back to mock data. Last error: {last_error}"
+    # No cache — raise a clear error, no silent mock fallback
+    error_msg = str(last_error) if last_error else "Unknown error"
+    raise RuntimeError(
+        f"SAP EMT 601 is unreachable for SP '{sourcing_project_id}'. "
+        f"Please check the SAP system status and try again. "
+        f"Technical details: {error_msg[:200]}"
     )
-    return _mock_tender_data(sourcing_project_id)
 
 
 def _parse_sp_response(sp: dict, sourcing_project_id: str) -> dict:

@@ -22,8 +22,11 @@ from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 from starlette.applications import Starlette
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import FileResponse
 from starlette.requests import Request
-from starlette.routing import Mount
+from starlette.responses import HTMLResponse
+from starlette.routing import Mount, Route
+from starlette.staticfiles import StaticFiles
 
 from agent_executor import AgentExecutor
 from ord import create_ord_routes
@@ -111,14 +114,41 @@ def main(host: str, port: int):
     a2a_app.add_middleware(DwcSubdomainMiddleware)
     auto_instrument(middlewares=[StarletteIASTelemetryMiddleware(app=a2a_app)])
 
-    # Combine ORD discovery routes with A2A app
+    # ── UI + Download route middleware ────────────────────────────────────────
+    _ui_path = Path(__file__).parent / "ui" / "index.html"
+    _ui_html  = _ui_path.read_text(encoding="utf-8")
+
+    # Shared docx store: sp_id -> file path (populated by Skill 4 via agent state)
+    # We read from the singleton agent instance
+    from agent_executor import _agent_instance
+
+    class UIAndDownloadMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            if request.url.path == "/ui":
+                return HTMLResponse(_ui_html)
+            if request.url.path.startswith("/download/"):
+                filename  = request.url.path.split("/download/")[-1]
+                output_dir = Path(__file__).parent.parent / "output_docs"
+                docx_path  = output_dir / filename
+                if docx_path.exists():
+                    return FileResponse(
+                        path=str(docx_path),
+                        filename=filename,
+                        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                from starlette.responses import Response
+                return Response(f"File not found: {filename}", status_code=404)
+            return await call_next(request)
+
     combined_app = Starlette(
         routes=[
             *create_ord_routes(),
             Mount("/", app=a2a_app),
         ]
     )
+    combined_app.add_middleware(UIAndDownloadMiddleware)
     logger.info(f"ORD endpoint: http://{host}:{port}/.well-known/open-resource-discovery")
+    logger.info(f"Test UI:      http://{host}:{port}/ui")
     uvicorn.run(combined_app, host=host, port=port)
 
 
