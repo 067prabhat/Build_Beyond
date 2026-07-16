@@ -1,0 +1,23 @@
+name: Aggregate Dynamic ORD
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_id:
+        description: 'Local Tenant ID / Subscription ID'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        default: canary
+        type: choice
+        options: [canary, live]
+
+jobs:
+  aggregate:
+    uses: application-foundation/ci-cd-workflow/.github/workflows/aggregate-dynamic-ord.yml@main
+    with:
+      subscription_id: ${{ inputs.subscription_id }}
+      environment: ${{ inputs.environment }}
+    secrets: inherit

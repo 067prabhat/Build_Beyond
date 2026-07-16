@@ -1,0 +1,95 @@
+{
+  "openResourceDiscovery": "1.14",
+  "$schema": "https://open-resource-discovery.org/spec-v1/interfaces/Document.schema.json",
+  "perspective": "system-instance",
+  "policyLevels": ["sap:ai:v1"],
+  "describedSystemInstance": {
+    "localId": "{{LOCAL_TENANT_ID}}"
+  },
+  "describedSystemVersion": {
+    "version": "1.0.0"
+  },
+  "description": "ORD document for tender-synopsis-agent (system-instance perspective)",
+  "packages": [
+    {
+      "ordId": "sap.pps:package:tender-synopsis-agent:v1",
+      "title": "Tender Synopsis Agent Package",
+      "shortDescription": "Package for Tender Synopsis Agent resources",
+      "description": "An AI agent that fetches SAP PPS Sourcing Projects, detects country-specific portal requirements, generates a compliant tender synopsis, and supports human review before publication.",
+      "version": "1.0.0",
+      "policyLevels": ["sap:ai:v1"],
+      "vendor": "sap:vendor:SAP:"
+    }
+  ],
+  "consumptionBundles": [
+    {
+      "ordId": "sap.pps:consumptionBundle:tender-synopsis-agent:v1",
+      "title": "Tender Synopsis Agent A2A API",
+      "shortDescription": "Authentication bundle for the A2A API",
+      "description": "This consumption bundle provides access to Tender Synopsis Agent via the A2A protocol.",
+      "version": "1.0.0",
+      "lastUpdate": "2026-07-09T15:35:41Z"
+    }
+  ],
+  "agents": [
+    {
+      "ordId": "sap.pps:agent:tender-synopsis-agent:v1",
+      "localId": "tender-synopsis-agent",
+      "title": "Tender Synopsis Agent",
+      "shortDescription": "An AI agent that fetches SAP PPS Sourcing Projects, detects country-specific portal requirements, generates a compliant tender synopsis, and supports human review before publication.",
+      "description": "The Tender Synopsis Agent automates the creation of country-compliant tender notices from SAP PPS Sourcing Projects. It detects the procuring entity country via CompanyCode, applies the correct portal format (eProcure, SAM.gov, TED, Etimad), generates a structured synopsis using Claude AI, and supports human review before publication via the A2A protocol.",
+      "version": "1.0.0",
+      "visibility": "internal",
+      "releaseStatus": "active",
+      "lastUpdate": "2026-07-09T15:35:41Z",
+      "partOfPackage": "sap.pps:package:tender-synopsis-agent:v1",
+      "labels": {
+        "interactionMode": ["conversational"]
+      },
+      "tags": ["sap", "ai-agent", "a2a"],
+      "exposedApiResources": [
+        {
+          "ordId": "sap.pps:apiResource:tender-synopsis-agent-api:v1"
+        }
+      ],
+      "integrationDependencies": []
+    }
+  ],
+  "apiResources": [
+    {
+      "ordId": "sap.pps:apiResource:tender-synopsis-agent-api:v1",
+      "title": "Tender Synopsis Agent A2A API",
+      "shortDescription": "A2A protocol API for Tender Synopsis Agent",
+      "description": "Agent-to-Agent (A2A) protocol API that enables interaction with Tender Synopsis Agent.",
+      "version": "1.0.0",
+      "lastUpdate": "2026-07-09T15:35:41Z",
+      "visibility": "internal",
+      "releaseStatus": "active",
+      "apiProtocol": "a2a",
+      "extensible": {
+        "supported": "no"
+      },
+      "partOfPackage": "sap.pps:package:tender-synopsis-agent:v1",
+      "partOfConsumptionBundles": [
+        {
+          "ordId": "sap.pps:consumptionBundle:tender-synopsis-agent:v1"
+        }
+      ],
+      "entryPoints": ["/"],
+      "resourceDefinitions": [
+        {
+          "type": "a2a-agent-card",
+          "mediaType": "application/json",
+          "url": "/.well-known/agent-card.json",
+          "accessStrategies": [
+            {
+              "type": "sap:cmp-mtls:v1"
+            }
+          ]
+        }
+      ],
+      "tags": ["a2a", "agent-api"]
+    }
+  ],
+  "integrationDependencies": []
+}

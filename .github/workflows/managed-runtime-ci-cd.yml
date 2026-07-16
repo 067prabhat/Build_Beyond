@@ -1,0 +1,16 @@
+name: App Foundation CD deploy to Managed Runtime
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+    - "main"
+
+jobs:
+  deploy-managed-runtime:
+    uses: application-foundation/ci-cd-workflow/.github/workflows/deploy-managed-runtime-dwc.yml@main
+    secrets: inherit
+    permissions:
+      contents: write
+      actions: read
+      id-token: write

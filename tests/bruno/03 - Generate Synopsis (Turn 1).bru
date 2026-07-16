@@ -1,0 +1,85 @@
+meta {
+  name: 03 - Generate Synopsis (Turn 1)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "gen-1",
+    "params": {
+      "message": {
+        "messageId": "msg-001",
+        "role": "user",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "Generate a tender synopsis for sourcing project {{sp_id}}"
+          }
+        ]
+      }
+    }
+  }
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (!data || !data.result) {
+    console.log("ERROR: No result in response");
+    return;
+  }
+
+  const result = data.result;
+
+  // Auto-save contextId for Turn 2 requests
+  bru.setVar("context_id", result.contextId);
+
+  // ── Pretty print the synopsis ──────────────────────────────
+  const status = result.status;
+  const state = status.state;
+  const text = status.message?.parts?.[0]?.text || "";
+
+  console.log("════════════════════════════════════════════════════");
+  console.log("  TENDER SYNOPSIS GENERATOR — A2A Agent Response");
+  console.log("════════════════════════════════════════════════════");
+  console.log("  Task State  : " + state);
+  console.log("  Context ID  : " + result.contextId);
+  console.log("  Task ID     : " + result.id);
+  console.log("════════════════════════════════════════════════════");
+  console.log("");
+  console.log(text);
+  console.log("");
+  console.log("════════════════════════════════════════════════════");
+  console.log("  Next step: Run '04 - Approve' or '05 - Reject'");
+  console.log("  context_id saved: " + result.contextId);
+  console.log("════════════════════════════════════════════════════");
+
+  // ── Assertions ─────────────────────────────────────────────
+  test("Response has result", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Task state is input-required (HITL active)", function() {
+    expect(state).to.equal("input-required");
+  });
+
+  test("Synopsis text is not empty", function() {
+    expect(text.length).to.be.greaterThan(100);
+  });
+
+  test("context_id captured", function() {
+    expect(result.contextId).to.be.a("string");
+  });
+}
