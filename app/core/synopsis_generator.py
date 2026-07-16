@@ -168,12 +168,38 @@ def _build_prompt(tender_data: dict, target_language: str, country_code: str = "
     country_instructions = _build_country_instructions(country_code)
     fmt = COUNTRY_FORMATS.get(country_code, COUNTRY_FORMATS["DEFAULT"])
     portal_name = fmt["portal"]
+    is_generic = (country_code == "DEFAULT")
+
+    if is_generic:
+        # Generic/fallback: use fixed 4-category grouping
+        sections_instruction = """
+GROUPING: Use exactly these 4 categories for supplierFields[].category:
+  overview    — who is procuring, status, procedure type
+  commercial  — value, scope, material group, contract period
+  dates       — all deadlines and key dates
+  eligibility — qualification criteria, award criteria"""
+        schema_category = '"category": "<overview | commercial | dates | eligibility>",'
+        rules_grouping = "4. category must be exactly one of: overview, commercial, dates, eligibility"
+    else:
+        # Country-specific portal: AI decides sections based on portal structure
+        sections_instruction = f"""
+GROUPING: Do NOT use fixed categories. Instead, group fields into sections as the {portal_name} portal template requires.
+- Decide section names based on how {portal_name} structures its official tender notices
+- Use the portal's own terminology for section titles (in {target_language} where appropriate)
+- Order sections as they appear in the actual {portal_name} publication format
+- Typical portals use sections like: Contracting Authority / Object of Contract / Procedure / Award Criteria / Dates
+- Use as many or as few sections as the portal template requires (typically 3-6 sections)
+- Every field must belong to a section — choose the most appropriate one"""
+        schema_category = f'"section": "<portal-appropriate section name in {target_language} — AI decides based on {portal_name} format>",'
+        rules_grouping = f"4. section must reflect the actual {portal_name} portal structure — AI decides appropriate section names"
+
     return f"""Analyse the following SAP PPS Sourcing Project data and generate a supplier-facing tender synopsis.
 
 TARGET LANGUAGE: {target_language}
 IMPORTANT: Write ALL narrative text (executiveSummary, supplierActions, portalComplianceNote, and any "Not specified" messages) in {target_language}. Field labels must use portal-standard terminology. SAP field names in sapSource stay in English.
 
 {country_instructions}
+{sections_instruction}
 
 SOURCING PROJECT DATA:
 {data_block}
@@ -190,7 +216,7 @@ Return only valid JSON with exactly these keys:
       "label": "<portal-standard label in {target_language}>",
       "value": "<actual SAP value; if absent: 'Not specified' in {target_language}>",
       "sapSource": "<SAP field name>",
-      "category": "<overview | commercial | dates | eligibility>",
+      {schema_category}
       "important": <true if critical for supplier; else false>
     }}
   ],
@@ -211,11 +237,11 @@ Return only valid JSON with exactly these keys:
 }}
 
 RULES FOR supplierFields:
-1. Include ONLY fields meaningful to a supplier — omit internal SAP fields
+1. Include ONLY fields meaningful to a supplier — omit internal SAP fields (CreatedBy, SourcingProjectVersion, CompanyCode, etc.)
 2. Every mandatory portal field must appear — use 'Not specified' if SAP value absent
 3. Use portal-standard label in {target_language}
-4. category must be exactly: overview, commercial, dates, eligibility
-5. Mark important: true for 3-5 most critical fields
-6. Typical count: 8-14 fields
+{rules_grouping}
+5. Mark important: true for 3-5 most critical fields a supplier must know
+6. Typical count: 8-14 fields depending on portal complexity
 
 Do not hallucinate. Use only values present in the SAP data."""

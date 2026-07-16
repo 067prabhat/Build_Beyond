@@ -902,23 +902,51 @@
     }
     const now  = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-    const CATEGORIES = [
-      {key:'overview',    icon:'📌', label:'Tender Overview'},
-      {key:'commercial',  icon:'💰', label:'Commercial Details'},
-      {key:'dates',       icon:'📅', label:'Key Dates'},
-      {key:'eligibility', icon:'✅', label:'Eligibility'},
-    ];
+    // ── Dynamic section grouping ──────────────────────────────────────────────
+    // For country-specific portals: Claude uses "section" key (AI-decided names)
+    // For DEFAULT/Generic portal:   Claude uses "category" key (4 fixed groups)
+    // We read whichever key is present in the first field.
+    const isGeneric = !s.portalCountryCode || s.portalCountryCode === 'DEFAULT';
+    const groupKey  = isGeneric ? 'category' : 'section';
 
-    // Build fields by category
+    // Section display config for the 4 generic categories (fallback only)
+    const GENERIC_ICONS = {
+      overview: '📌', commercial: '💰', dates: '📅', eligibility: '✅'
+    };
+    const GENERIC_LABELS = {
+      overview: 'Tender Overview', commercial: 'Commercial Details',
+      dates: 'Key Dates', eligibility: 'Eligibility'
+    };
+
+    // Build ordered unique section list preserving Claude's field order
+    const sectionOrder = [];
+    const seen = new Set();
+    (s.supplierFields || []).forEach(f => {
+      const sec = f[groupKey] || f.category || f.section || 'general';
+      if (!seen.has(sec)) { seen.add(sec); sectionOrder.push(sec); }
+    });
+
+    // Date-like section detection (for tile rendering)
+    const isDateSection = sec =>
+      sec === 'dates' ||
+      /date|deadline|frist|plazo|délai|срок|مواعيد|datum|日期/i.test(sec);
+
+    // Build fields by section
     let fieldsHtml = '';
-    for (const cat of CATEGORIES) {
-      const catFields = s.supplierFields.filter(f => f.category === cat.key);
-      if (!catFields.length) continue;
+    for (const sec of sectionOrder) {
+      const secFields = s.supplierFields.filter(f =>
+        (f[groupKey] || f.category || f.section || 'general') === sec
+      );
+      if (!secFields.length) continue;
 
-      if (cat.key === 'dates') {
-        // Date tiles
+      // Section title: use generic label for known categories, else use sec directly
+      const icon  = GENERIC_ICONS[sec] || '📋';
+      const label = GENERIC_LABELS[sec] || sec;
+
+      if (isDateSection(sec)) {
+        // Render as date tiles
         let tilesHtml = '';
-        catFields.forEach((f, i) => {
+        secFields.forEach((f, i) => {
           const tileClass = i === 1 ? 'deadline' : i === 2 ? 'opening' : '';
           const valClass  = f.value.toLowerCase().startsWith('not spec') ? 'muted' : '';
           tilesHtml += `<div class="syn-date-tile ${tileClass}">
@@ -928,14 +956,15 @@
         });
         fieldsHtml += `
           <div class="syn-section">
-            <div class="syn-section-title">${cat.icon} ${cat.label}</div>
+            <div class="syn-section-title">${icon} ${esc(label)}</div>
           </div>
           <div class="syn-dates">${tilesHtml}</div>`;
       } else {
+        // Render as attribute rows
         let rowsHtml = '';
-        catFields.forEach(f => {
+        secFields.forEach(f => {
           const isMuted = f.value.toLowerCase().startsWith('not spec');
-          const valCls  = isMuted ? 'muted' : (f.category === 'commercial' && f.important ? 'brand' : '');
+          const valCls  = isMuted ? 'muted' : (f.important ? 'brand' : '');
           rowsHtml += `<div class="syn-field">
             <span class="syn-star">${f.important ? '★' : ''}</span>
             <span class="syn-field-label">${esc(f.label)}</span>
@@ -943,7 +972,7 @@
           </div>`;
         });
         fieldsHtml += `<div class="syn-section">
-          <div class="syn-section-title">${cat.icon} ${cat.label}</div>
+          <div class="syn-section-title">${icon} ${esc(label)}</div>
           ${rowsHtml}
         </div>`;
       }
