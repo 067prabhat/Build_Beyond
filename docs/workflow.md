@@ -23,35 +23,31 @@ Every sub-node returns control to it, so adding a new node is a single
 `if / elif` in that function.
 
 ```mermaid
-%%{init: {'flowchart': {'curve': 'basis'}}}%%
 graph TD
-    __start__([<b>START</b>]):::start
-    orchestrator{{orchestrator<br/><i>pure-Python router</i>}}:::router
+    START(["START"])
+    orchestrator["orchestrator<br/>pure-Python router"]
 
-    detect_country[detect_country]:::skill
-    load_template[load_template]:::skill
-    sap_fetch[sap_fetch]:::skill
-    generate_synopsis[generate_synopsis]:::skill
-    ai_validate[ai_validate]:::skill
-    await_hitl[/await_hitl<br/><i>HITL gate</i>/]:::hitl
-    skill4_publish[skill4_publish]:::skill
+    detect_country["detect_country"]
+    load_template["load_template"]
+    sap_fetch["sap_fetch"]
+    generate_synopsis["generate_synopsis"]
+    ai_validate["ai_validate"]
+    await_hitl["await_hitl<br/>HITL gate"]
+    skill4_publish["skill4_publish"]
 
-    __end__([<b>END</b>]):::finish
+    ENDN(["END"])
 
-    %% Entry
-    __start__ --> orchestrator
+    START --> orchestrator
 
-    %% Fan-out: orchestrator dispatches to any sub-node
-    orchestrator -->|next_skill=detect_country|    detect_country
-    orchestrator -->|next_skill=load_template|     load_template
-    orchestrator -->|next_skill=sap_fetch|         sap_fetch
-    orchestrator -->|next_skill=generate_synopsis| generate_synopsis
-    orchestrator -->|next_skill=ai_validate|       ai_validate
-    orchestrator -->|next_skill=await_hitl|        await_hitl
-    orchestrator -->|next_skill=skill4_publish|    skill4_publish
-    orchestrator -->|next_skill=end|               __end__
+    orchestrator -->|detect_country| detect_country
+    orchestrator -->|load_template| load_template
+    orchestrator -->|sap_fetch| sap_fetch
+    orchestrator -->|generate_synopsis| generate_synopsis
+    orchestrator -->|ai_validate| ai_validate
+    orchestrator -->|await_hitl| await_hitl
+    orchestrator -->|skill4_publish| skill4_publish
+    orchestrator -->|end| ENDN
 
-    %% Fan-in: every sub-node returns to the orchestrator
     detect_country    --> orchestrator
     load_template     --> orchestrator
     sap_fetch         --> orchestrator
@@ -60,11 +56,15 @@ graph TD
     await_hitl        --> orchestrator
     skill4_publish    --> orchestrator
 
-    classDef start   fill:#0070F2,stroke:#003D75,color:white,font-weight:bold;
-    classDef finish  fill:#107E3E,stroke:#0B5C2C,color:white,font-weight:bold;
-    classDef router  fill:#1B2A4A,stroke:#0F1B33,color:white,font-weight:bold;
-    classDef skill   fill:#FFFFFF,stroke:#0070F2,color:#1B2A4A;
-    classDef hitl    fill:#E9730C,stroke:#B85908,color:white,font-weight:bold;
+    classDef entryExit fill:#0070F2,stroke:#003D75,color:#FFFFFF;
+    classDef router    fill:#1B2A4A,stroke:#0F1B33,color:#FFFFFF;
+    classDef skill     fill:#F5F6F7,stroke:#0070F2,color:#1B2A4A;
+    classDef hitl      fill:#E9730C,stroke:#B85908,color:#FFFFFF;
+
+    class START,ENDN entryExit;
+    class orchestrator router;
+    class detect_country,load_template,sap_fetch,generate_synopsis,ai_validate,skill4_publish skill;
+    class await_hitl hitl;
 ```
 
 ---
@@ -88,18 +88,18 @@ graph TD
 
 The orchestrator inspects state and picks the next node. This is the entire routing logic:
 
-```python
-if state.error:                                             -> end
-elif hitl_decision == "approved":                           -> skill4_publish
-elif hitl_decision == "rejected":                           -> end
-elif hitl_decision == "edit":                               -> await_hitl (after applying edits)
-elif not country_code:                                      -> detect_country
-elif not portal_template:                                   -> load_template
-elif not tender_data:                                       -> sap_fetch
-elif not synopsis:                                          -> generate_synopsis
-elif not validation:                                        -> ai_validate
-elif validation.should_regenerate and attempts < MAX:       -> generate_synopsis (retry)
-else:                                                       -> await_hitl
+```text
+if state.error                                          -> end
+elif hitl_decision == "approved"                        -> skill4_publish
+elif hitl_decision == "rejected"                        -> end
+elif hitl_decision == "edit"                            -> await_hitl (after applying edits)
+elif not country_code                                   -> detect_country
+elif not portal_template                                -> load_template
+elif not tender_data                                    -> sap_fetch
+elif not synopsis                                       -> generate_synopsis
+elif not validation                                     -> ai_validate
+elif validation.should_regenerate and attempts < MAX    -> generate_synopsis (retry)
+else                                                    -> await_hitl
 ```
 
 ---
@@ -115,22 +115,22 @@ sequenceDiagram
     participant N as sub-nodes
     participant CK as HanaMemorySaver
 
-    U->>A: turn 1: "Generate synopsis for SP 5189"
-    A->>O: ainvoke(state, {thread_id: ctx})
-    O->>N: detect_country -> load_template -> sap_fetch -> generate -> validate
+    U->>A: turn 1 "Generate synopsis for SP 5189"
+    A->>O: ainvoke(state, thread_id ctx)
+    O->>N: detect_country then load_template then sap_fetch then generate then validate
     N-->>CK: save checkpoint after each node (persistent)
-    O-->>A: hitl_decision=pending, synopsis present
-    A-->>U: yield {require_user_input: true, __synopsis__: {...}}
+    O-->>A: hitl_decision pending, synopsis present
+    A-->>U: yield require_user_input true, synopsis payload
 
-    Note over U,CK: session state now durable in SAP Agent Memory<br/>even if the pod restarts
+    Note over U,CK: session state now durable in SAP Agent Memory even if the pod restarts
 
-    U->>A: turn 2: "approve"
-    A->>O: ainvoke({...state, hitl_decision: approved}, {thread_id: ctx})
-    Note over CK: get_state(thread_id) restores the exact synopsis<br/>from HanaMemorySaver
+    U->>A: turn 2 "approve"
+    A->>O: ainvoke(state hitl_decision approved, thread_id ctx)
+    Note over CK: get_state(thread_id) restores the exact synopsis from HanaMemorySaver
     O->>N: skill4_publish
-    N->>N: save .docx, remember_approval(), record_hitl_feedback(action=approve)
+    N->>N: save docx, remember_approval, record_hitl_feedback action approve
     O-->>A: publication_ref present
-    A-->>U: yield {is_task_complete: true, __download_url__: "..."}
+    A-->>U: yield is_task_complete true, download_url
 ```
 
 ---
