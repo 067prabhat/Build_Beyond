@@ -1,0 +1,37 @@
+{
+  "portal_country_code": "GB",
+  "portal_name": "Find a Tender / Contracts Finder (UK)",
+  "version": "GB-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "GBP",
+  "default_language": "English",
+  "standard": "PCR 2015 / Procurement Act 2023",
+  "section_superset": [
+    {"id": "sec_authority", "title": "Contracting Authority", "order": 1, "required": true},
+    {"id": "sec_object",    "title": "Object of Contract",    "order": 2, "required": true},
+    {"id": "sec_procedure", "title": "Procedure",             "order": 3, "required": true},
+    {"id": "sec_lots",      "title": "Lots",                  "order": 4, "required": false},
+    {"id": "sec_award",     "title": "Award Criteria",        "order": 5, "required": true},
+    {"id": "sec_dates",     "title": "Key Dates",             "order": 6, "required": true}
+  ],
+  "fields": [
+    {"portal_field_id": "contractingAuthority","label": "Contracting Authority","section_id": "sec_authority","data_type": "text",     "sap_source_hint": "PurchasingOrganization","required": true, "important": true},
+    {"portal_field_id": "purchasingGroup",     "label": "Buying Group",         "section_id": "sec_authority","data_type": "text",     "sap_source_hint": "PurchasingGroup","required": false,"important": false},
+    {"portal_field_id": "tenderReference",     "label": "Tender Reference",     "section_id": "sec_object",   "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject","required": true,"important": true},
+    {"portal_field_id": "tenderTitle",         "label": "Contract Title",       "section_id": "sec_object",   "data_type": "text",     "sap_source_hint": "SourcingProjectName","required": true,"important": true},
+    {"portal_field_id": "cpvCode",             "label": "CPV Code",             "section_id": "sec_object",   "data_type": "code",     "sap_source_hint": "MaterialGroup|PurchasingCategory","required": true,"important": true},
+    {"portal_field_id": "estimatedValue",      "label": "Estimated Value",      "section_id": "sec_object",   "data_type": "currency", "sap_source_hint": "TotalTargetAmount","required": true,"important": true},
+    {"portal_field_id": "currency",            "label": "Currency",             "section_id": "sec_object",   "data_type": "code",     "sap_source_hint": "DocumentCurrency","required": false,"important": false},
+    {"portal_field_id": "procedureType",       "label": "Procedure",            "section_id": "sec_procedure","data_type": "text",     "sap_source_hint": "ProcedureType","required": true,"important": true},
+    {"portal_field_id": "aboveBelowThreshold", "label": "Above / Below Threshold","section_id": "sec_procedure","data_type": "text",   "sap_source_hint": "","required": false,"important": false},
+    {"portal_field_id": "lots",                "label": "Lots",                 "section_id": "sec_lots",     "data_type": "text",     "sap_source_hint": "","required": false,"important": false},
+    {"portal_field_id": "awardCriteria",       "label": "Award Criteria",       "section_id": "sec_award",    "data_type": "text",     "sap_source_hint": "","required": true,"important": true},
+    {"portal_field_id": "bidSubmission",       "label": "Bid Submission Deadline","section_id": "sec_dates",  "data_type": "datetime", "sap_source_hint": "BidSubmissionDeadline","required": true,"important": true},
+    {"portal_field_id": "bidOpening",          "label": "Bid Opening",          "section_id": "sec_dates",    "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime","required": false,"important": false},
+    {"portal_field_id": "supplierRegDeadline", "label": "Registration Deadline","section_id": "sec_dates",    "data_type": "datetime", "sap_source_hint": "SupplierRegistrationDeadline","required": false,"important": true},
+    {"portal_field_id": "contractStart",       "label": "Contract Start",       "section_id": "sec_dates",    "data_type": "date",     "sap_source_hint": "ContractValidityStart","required": false,"important": false},
+    {"portal_field_id": "contractEnd",         "label": "Contract End",         "section_id": "sec_dates",    "data_type": "date",     "sap_source_hint": "ContractValidityEnd","required": false,"important": false}
+  ],
+  "terminology": {},
+  "validation_weights_override": {}
+}

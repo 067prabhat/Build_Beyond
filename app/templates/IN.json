@@ -1,0 +1,46 @@
+{
+  "portal_country_code": "IN",
+  "portal_name": "eProcure / GeM Portal (India)",
+  "version": "IN-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "INR",
+  "default_language": "English",
+  "standard": "GFR 2017 / CVC Guidelines",
+  "section_superset": [
+    {"id": "sec_overview",     "title": "Tender Notice Overview",      "order": 1, "required": true},
+    {"id": "sec_authority",    "title": "Tender Inviting Authority",   "order": 2, "required": true},
+    {"id": "sec_commercial",   "title": "Estimated Cost & EMD",        "order": 3, "required": true},
+    {"id": "sec_dates",        "title": "Key Dates",                   "order": 4, "required": true},
+    {"id": "sec_eligibility",  "title": "Eligibility Criteria",        "order": 5, "required": false},
+    {"id": "sec_location",     "title": "Work Location & Scope",       "order": 6, "required": false}
+  ],
+  "fields": [
+    {"portal_field_id": "nitNumber",        "label": "NIT Number",                       "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "SourcingProject|ExternalReference", "required": true,  "important": true},
+    {"portal_field_id": "tenderTitle",      "label": "Tender Title",                     "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "SourcingProjectName",               "required": true,  "important": true},
+    {"portal_field_id": "tenderType",       "label": "Tender Type",                      "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ProcedureType",                      "required": true,  "important": false},
+    {"portal_field_id": "status",           "label": "Status",                           "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "LifecycleStatus",                    "required": false, "important": false},
+    {"portal_field_id": "tia",              "label": "Tender Inviting Authority (TIA)",  "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingOrganization",             "required": true,  "important": true},
+    {"portal_field_id": "purchasingGroup",  "label": "Purchasing Group",                 "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingGroup",                    "required": false, "important": false},
+    {"portal_field_id": "estimatedCost",    "label": "Estimated Cost / Tender Value",    "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "TotalTargetAmount",                   "required": true,  "important": true},
+    {"portal_field_id": "currency",         "label": "Currency",                         "section_id": "sec_commercial", "data_type": "code",     "sap_source_hint": "DocumentCurrency",                    "required": true,  "important": false},
+    {"portal_field_id": "emdAmount",        "label": "EMD Amount",                       "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "",                                   "required": true,  "important": true},
+    {"portal_field_id": "tenderFee",        "label": "Tender Fee",                       "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "",                                   "required": true,  "important": false},
+    {"portal_field_id": "bidSubmission",    "label": "Last Date & Time of Bid Submission","section_id": "sec_dates",     "data_type": "datetime","sap_source_hint": "BidSubmissionDeadline",              "required": true,  "important": true},
+    {"portal_field_id": "bidOpening",       "label": "Bid Opening Date & Time",          "section_id": "sec_dates",      "data_type": "datetime","sap_source_hint": "BidOpeningDateTime",                 "required": true,  "important": true},
+    {"portal_field_id": "supplierRegDeadline","label": "Supplier Registration Deadline", "section_id": "sec_dates",      "data_type": "datetime","sap_source_hint": "SupplierRegistrationDeadline",       "required": false, "important": true},
+    {"portal_field_id": "bidValidity",      "label": "Bid Validity Period",              "section_id": "sec_dates",      "data_type": "text",     "sap_source_hint": "",                                   "required": true,  "important": false},
+    {"portal_field_id": "contractStart",    "label": "Contract Period Start",            "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityStart",              "required": false, "important": false},
+    {"portal_field_id": "contractEnd",      "label": "Contract Period End",              "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityEnd",                "required": false, "important": false},
+    {"portal_field_id": "contractorClass",  "label": "Contractor Category / Class",      "section_id": "sec_eligibility","data_type": "text",     "sap_source_hint": "",                                   "required": true,  "important": true},
+    {"portal_field_id": "workLocation",     "label": "Work Location",                    "section_id": "sec_location",   "data_type": "text",     "sap_source_hint": "",                                   "required": true,  "important": false},
+    {"portal_field_id": "materialGroup",    "label": "Material Group / Category",        "section_id": "sec_location",   "data_type": "text",     "sap_source_hint": "MaterialGroup",                       "required": false, "important": false}
+  ],
+  "terminology": {
+    "procedureType":         "Tender Type",
+    "procuringEntity":       "Tender Inviting Authority (TIA)",
+    "bidSubmissionDeadline": "Last Date & Time of Bid Submission",
+    "tenderValue":           "Estimated Cost / Tender Value",
+    "contractValidity":      "Contract Period"
+  },
+  "validation_weights_override": {}
+}

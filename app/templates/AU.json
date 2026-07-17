@@ -1,0 +1,35 @@
+{
+  "portal_country_code": "AU",
+  "portal_name": "AusTender (Australia)",
+  "version": "AU-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "AUD",
+  "default_language": "English",
+  "standard": "Commonwealth Procurement Rules (CPRs)",
+  "section_superset": [
+    {"id": "sec_overview",   "title": "ATM Overview",           "order": 1, "required": true},
+    {"id": "sec_authority",  "title": "Contact Details",        "order": 2, "required": true},
+    {"id": "sec_commercial", "title": "Value & Classification", "order": 3, "required": true},
+    {"id": "sec_dates",      "title": "Key Dates",              "order": 4, "required": true},
+    {"id": "sec_eligibility","title": "Participation",          "order": 5, "required": false}
+  ],
+  "fields": [
+    {"portal_field_id": "atmId",             "label": "ATM ID",                    "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject","required": true,"important": true},
+    {"portal_field_id": "tenderTitle",       "label": "ATM Title",                 "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "SourcingProjectName","required": true,"important": true},
+    {"portal_field_id": "atmType",           "label": "ATM Type",                  "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ProcedureType","required": true,"important": false},
+    {"portal_field_id": "agency",            "label": "Agency",                    "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingOrganization","required": true,"important": true},
+    {"portal_field_id": "purchasingGroup",   "label": "Contact Group",             "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingGroup","required": false,"important": false},
+    {"portal_field_id": "estimatedValue",    "label": "Estimated Value (AUD)",     "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "TotalTargetAmount","required": true,"important": true},
+    {"portal_field_id": "currency",          "label": "Currency",                  "section_id": "sec_commercial", "data_type": "code",     "sap_source_hint": "DocumentCurrency","required": false,"important": false},
+    {"portal_field_id": "unspscCode",        "label": "UNSPSC Code",               "section_id": "sec_commercial", "data_type": "code",     "sap_source_hint": "MaterialGroup|PurchasingCategory","required": true,"important": true},
+    {"portal_field_id": "bidSubmission",     "label": "Closing Date & Time",       "section_id": "sec_dates",      "data_type": "datetime", "sap_source_hint": "BidSubmissionDeadline","required": true,"important": true},
+    {"portal_field_id": "bidOpening",        "label": "Opening",                   "section_id": "sec_dates",      "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime","required": false,"important": false},
+    {"portal_field_id": "supplierRegDeadline","label": "Registration of Interest Deadline","section_id": "sec_dates","data_type": "datetime","sap_source_hint": "SupplierRegistrationDeadline","required": false,"important": true},
+    {"portal_field_id": "contractStart",     "label": "Contract Start",            "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityStart","required": false,"important": false},
+    {"portal_field_id": "contractEnd",       "label": "Contract End",              "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityEnd","required": false,"important": false},
+    {"portal_field_id": "indigenousPolicy",  "label": "Indigenous Procurement Policy","section_id": "sec_eligibility","data_type": "text",  "sap_source_hint": "","required": false,"important": false},
+    {"portal_field_id": "smeParticipation",  "label": "SME Participation",         "section_id": "sec_eligibility","data_type": "text",     "sap_source_hint": "","required": false,"important": false}
+  ],
+  "terminology": {},
+  "validation_weights_override": {}
+}

@@ -1,0 +1,47 @@
+{
+  "portal_country_code": "DE",
+  "portal_name": "TED / DTVP (EU / Germany)",
+  "version": "DE-hardcoded-1.0.0",
+  "date_format": "DD.MM.YYYY",
+  "currency_hint": "EUR",
+  "default_language": "German",
+  "standard": "Directive 2014/24/EU / VgV",
+  "section_superset": [
+    {"id": "sec_authority",    "title": "Oeffentlicher Auftraggeber",       "order": 1, "required": true},
+    {"id": "sec_object",       "title": "Auftragsgegenstand",              "order": 2, "required": true},
+    {"id": "sec_procedure",    "title": "Vergabeverfahren",                "order": 3, "required": true},
+    {"id": "sec_lots",         "title": "Lose",                            "order": 4, "required": false},
+    {"id": "sec_award",        "title": "Zuschlagskriterien",              "order": 5, "required": true},
+    {"id": "sec_dates",        "title": "Fristen",                         "order": 6, "required": true},
+    {"id": "sec_suitability",  "title": "Eignungskriterien",               "order": 7, "required": false}
+  ],
+  "fields": [
+    {"portal_field_id": "contractingAuthority","label": "Oeffentlicher Auftraggeber","section_id": "sec_authority","data_type": "text","sap_source_hint": "PurchasingOrganization","required": true,"important": true},
+    {"portal_field_id": "purchasingGroup",     "label": "Vergabestelle",           "section_id": "sec_authority","data_type": "text","sap_source_hint": "PurchasingGroup","required": false,"important": false},
+    {"portal_field_id": "tenderTitle",         "label": "Auftragsbezeichnung",     "section_id": "sec_object",   "data_type": "text","sap_source_hint": "SourcingProjectName","required": true,"important": true},
+    {"portal_field_id": "cpvCode",             "label": "CPV-Code",                "section_id": "sec_object",   "data_type": "code","sap_source_hint": "MaterialGroup|PurchasingCategory","required": true,"important": true},
+    {"portal_field_id": "estimatedValue",      "label": "Geschaetzter Auftragswert","section_id": "sec_object", "data_type": "currency","sap_source_hint": "TotalTargetAmount","required": true,"important": true},
+    {"portal_field_id": "currency",            "label": "Waehrung",                "section_id": "sec_object",   "data_type": "code","sap_source_hint": "DocumentCurrency","required": false,"important": false},
+    {"portal_field_id": "procedureType",       "label": "Art des Vergabeverfahrens","section_id": "sec_procedure","data_type": "text","sap_source_hint": "ProcedureType","required": true,"important": true},
+    {"portal_field_id": "priorNoticeRef",      "label": "Referenz Vorinformation", "section_id": "sec_procedure","data_type": "text","sap_source_hint": "ExternalReference","required": false,"important": false},
+    {"portal_field_id": "lotStructure",        "label": "Aufteilung in Lose",      "section_id": "sec_lots",     "data_type": "text","sap_source_hint": "","required": false,"important": false},
+    {"portal_field_id": "awardCriteria",       "label": "Zuschlagskriterien",      "section_id": "sec_award",    "data_type": "text","sap_source_hint": "","required": true,"important": true},
+    {"portal_field_id": "bidSubmission",       "label": "Schlusstermin fuer Angebote","section_id": "sec_dates", "data_type": "datetime","sap_source_hint": "BidSubmissionDeadline","required": true,"important": true},
+    {"portal_field_id": "bidOpening",          "label": "Angebotseroeffnung",      "section_id": "sec_dates",    "data_type": "datetime","sap_source_hint": "BidOpeningDateTime","required": false,"important": true},
+    {"portal_field_id": "supplierRegDeadline", "label": "Frist fuer Bewerbungen",  "section_id": "sec_dates",    "data_type": "datetime","sap_source_hint": "SupplierRegistrationDeadline","required": false,"important": true},
+    {"portal_field_id": "contractStart",       "label": "Laufzeitbeginn",          "section_id": "sec_dates",    "data_type": "date","sap_source_hint": "ContractValidityStart","required": false,"important": false},
+    {"portal_field_id": "contractEnd",         "label": "Laufzeitende",            "section_id": "sec_dates",    "data_type": "date","sap_source_hint": "ContractValidityEnd","required": false,"important": false},
+    {"portal_field_id": "suitabilityCriteria", "label": "Eignungskriterien",       "section_id": "sec_suitability","data_type": "text","sap_source_hint": "","required": false,"important": false}
+  ],
+  "terminology": {
+    "procedureType":         "Vergabeverfahren",
+    "procuringEntity":       "Oeffentlicher Auftraggeber",
+    "bidSubmissionDeadline": "Schlusstermin fuer Angebote",
+    "tenderValue":           "Geschaetzter Auftragswert",
+    "contractValidity":      "Laufzeit des Auftrags"
+  },
+  "validation_weights_override": {
+    "date_format": 20,
+    "portal_labels": 15
+  }
+}

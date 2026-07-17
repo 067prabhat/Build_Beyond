@@ -1,0 +1,46 @@
+{
+  "portal_country_code": "US",
+  "portal_name": "SAM.gov (USA)",
+  "version": "US-hardcoded-1.0.0",
+  "date_format": "MM/DD/YYYY",
+  "currency_hint": "USD",
+  "default_language": "English",
+  "standard": "FAR / DFARS",
+  "section_superset": [
+    {"id": "sec_overview",  "title": "Opportunity Overview",  "order": 1, "required": true},
+    {"id": "sec_procuring", "title": "Contracting Office",    "order": 2, "required": true},
+    {"id": "sec_classify",  "title": "Classification",        "order": 3, "required": true},
+    {"id": "sec_dates",     "title": "Key Dates",             "order": 4, "required": true},
+    {"id": "sec_setaside",  "title": "Set-Aside Program",     "order": 5, "required": false},
+    {"id": "sec_award",     "title": "Award Information",     "order": 6, "required": false}
+  ],
+  "fields": [
+    {"portal_field_id": "solicitationNumber","label": "Solicitation Number",     "section_id": "sec_overview",  "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject",  "required": true,  "important": true},
+    {"portal_field_id": "title",             "label": "Opportunity Title",       "section_id": "sec_overview",  "data_type": "text",     "sap_source_hint": "SourcingProjectName",                "required": true,  "important": true},
+    {"portal_field_id": "solicitationType",  "label": "Solicitation Type",       "section_id": "sec_overview",  "data_type": "text",     "sap_source_hint": "ProcedureType",                       "required": true,  "important": false},
+    {"portal_field_id": "contractingOffice", "label": "Contracting Office",      "section_id": "sec_procuring", "data_type": "text",     "sap_source_hint": "PurchasingOrganization",              "required": true,  "important": true},
+    {"portal_field_id": "purchasingGroup",   "label": "Buyer Group",             "section_id": "sec_procuring", "data_type": "text",     "sap_source_hint": "PurchasingGroup",                     "required": false, "important": false},
+    {"portal_field_id": "naicsCode",         "label": "NAICS Code",              "section_id": "sec_classify",  "data_type": "code",     "sap_source_hint": "MaterialGroup|PurchasingCategory",    "required": true,  "important": true},
+    {"portal_field_id": "pscCode",           "label": "PSC Code",                "section_id": "sec_classify",  "data_type": "code",     "sap_source_hint": "PurchasingCategory",                  "required": true,  "important": false},
+    {"portal_field_id": "cageCode",          "label": "CAGE Code",               "section_id": "sec_classify",  "data_type": "code",     "sap_source_hint": "",                                    "required": false, "important": false},
+    {"portal_field_id": "contractType",      "label": "Contract Type",           "section_id": "sec_classify",  "data_type": "text",     "sap_source_hint": "",                                    "required": false, "important": false},
+    {"portal_field_id": "estimatedValue",    "label": "Estimated Contract Value","section_id": "sec_classify",  "data_type": "currency", "sap_source_hint": "TotalTargetAmount",                   "required": true,  "important": true},
+    {"portal_field_id": "responseDeadline",  "label": "Response Deadline",       "section_id": "sec_dates",     "data_type": "datetime", "sap_source_hint": "BidSubmissionDeadline",               "required": true,  "important": true},
+    {"portal_field_id": "bidOpening",        "label": "Proposal Opening",        "section_id": "sec_dates",     "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime",                  "required": false, "important": false},
+    {"portal_field_id": "performancePeriodStart","label": "Period of Performance Start","section_id": "sec_dates","data_type": "date","sap_source_hint": "ContractValidityStart",                  "required": false, "important": false},
+    {"portal_field_id": "performancePeriodEnd",  "label": "Period of Performance End","section_id": "sec_dates","data_type": "date","sap_source_hint": "ContractValidityEnd",                     "required": false, "important": false},
+    {"portal_field_id": "setAsideType",      "label": "Set-Aside Type",          "section_id": "sec_setaside",  "data_type": "text",     "sap_source_hint": "",                                    "required": false, "important": false},
+    {"portal_field_id": "placeOfPerformance","label": "Place of Performance",    "section_id": "sec_award",     "data_type": "text",     "sap_source_hint": "",                                    "required": false, "important": false}
+  ],
+  "terminology": {
+    "procedureType":         "Solicitation Type",
+    "procuringEntity":       "Contracting Office",
+    "bidSubmissionDeadline": "Response Deadline",
+    "tenderValue":           "Estimated Contract Value",
+    "contractValidity":      "Period of Performance"
+  },
+  "validation_weights_override": {
+    "data_accuracy": 25,
+    "portal_labels": 5
+  }
+}

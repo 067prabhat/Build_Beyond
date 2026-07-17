@@ -1,0 +1,35 @@
+{
+  "portal_country_code": "AE",
+  "portal_name": "Tejari / Federal Portal (UAE)",
+  "version": "AE-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "AED",
+  "default_language": "English",
+  "standard": "Federal Law No. 6/2018",
+  "section_superset": [
+    {"id": "sec_overview",    "title": "Tender Overview",   "order": 1, "required": true},
+    {"id": "sec_authority",   "title": "Procuring Entity",  "order": 2, "required": true},
+    {"id": "sec_commercial",  "title": "Value & Bond",      "order": 3, "required": true},
+    {"id": "sec_dates",       "title": "Key Dates",         "order": 4, "required": true},
+    {"id": "sec_eligibility", "title": "Vendor Eligibility","order": 5, "required": false}
+  ],
+  "fields": [
+    {"portal_field_id": "tenderReference", "label": "Tender Reference",              "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject","required": true,  "important": true},
+    {"portal_field_id": "tenderTitle",     "label": "Tender Title",                  "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "SourcingProjectName","required": true, "important": true},
+    {"portal_field_id": "category",        "label": "Category",                      "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "PurchasingCategory","required": true, "important": false},
+    {"portal_field_id": "procuringEntity", "label": "Procuring Entity",              "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingOrganization","required": true, "important": true},
+    {"portal_field_id": "purchasingGroup", "label": "Buyer Group",                   "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingGroup","required": false, "important": false},
+    {"portal_field_id": "estimatedValue",  "label": "Estimated Value",               "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "TotalTargetAmount","required": true, "important": true},
+    {"portal_field_id": "currency",        "label": "Currency",                      "section_id": "sec_commercial", "data_type": "code",     "sap_source_hint": "DocumentCurrency","required": true, "important": false},
+    {"portal_field_id": "performanceBond", "label": "Performance Bond",              "section_id": "sec_commercial", "data_type": "text",     "sap_source_hint": "","required": true, "important": true},
+    {"portal_field_id": "bidSubmission",   "label": "Bid Submission Deadline",       "section_id": "sec_dates",      "data_type": "datetime", "sap_source_hint": "BidSubmissionDeadline","required": true, "important": true},
+    {"portal_field_id": "bidOpening",      "label": "Bid Opening",                   "section_id": "sec_dates",      "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime","required": false, "important": true},
+    {"portal_field_id": "supplierRegDeadline","label": "Supplier Registration Deadline","section_id": "sec_dates",   "data_type": "datetime", "sap_source_hint": "SupplierRegistrationDeadline","required": false, "important": true},
+    {"portal_field_id": "contractStart",   "label": "Contract Start",                "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityStart","required": false, "important": false},
+    {"portal_field_id": "contractEnd",     "label": "Contract End",                  "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityEnd","required": false, "important": false},
+    {"portal_field_id": "tradeLicense",    "label": "Trade License",                 "section_id": "sec_eligibility","data_type": "text",     "sap_source_hint": "","required": true, "important": true},
+    {"portal_field_id": "vendorRegCert",   "label": "Vendor Registration Certificate","section_id": "sec_eligibility","data_type": "text",    "sap_source_hint": "","required": true, "important": false}
+  ],
+  "terminology": {},
+  "validation_weights_override": {}
+}

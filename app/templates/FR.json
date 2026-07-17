@@ -1,0 +1,36 @@
+{
+  "portal_country_code": "FR",
+  "portal_name": "BOAMP / Marches Publics (France)",
+  "version": "FR-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "EUR",
+  "default_language": "French",
+  "standard": "Code de la commande publique",
+  "section_superset": [
+    {"id": "sec_authority", "title": "Pouvoir adjudicateur",   "order": 1, "required": true},
+    {"id": "sec_object",    "title": "Objet du marche",        "order": 2, "required": true},
+    {"id": "sec_procedure", "title": "Procedure",              "order": 3, "required": true},
+    {"id": "sec_lots",      "title": "Lots",                   "order": 4, "required": false},
+    {"id": "sec_award",     "title": "Criteres d'attribution", "order": 5, "required": true},
+    {"id": "sec_dates",     "title": "Dates cles",             "order": 6, "required": true}
+  ],
+  "fields": [
+    {"portal_field_id": "contractingAuthority","label": "Pouvoir adjudicateur","section_id": "sec_authority","data_type": "text",     "sap_source_hint": "PurchasingOrganization","required": true,"important": true},
+    {"portal_field_id": "purchasingGroup",     "label": "Service acheteur",    "section_id": "sec_authority","data_type": "text",     "sap_source_hint": "PurchasingGroup","required": false,"important": false},
+    {"portal_field_id": "tenderReference",     "label": "Reference de l'avis","section_id": "sec_object",    "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject","required": true,"important": true},
+    {"portal_field_id": "tenderTitle",         "label": "Intitule du marche",  "section_id": "sec_object",    "data_type": "text",     "sap_source_hint": "SourcingProjectName","required": true,"important": true},
+    {"portal_field_id": "cpvCode",             "label": "Code CPV",            "section_id": "sec_object",    "data_type": "code",     "sap_source_hint": "MaterialGroup|PurchasingCategory","required": true,"important": true},
+    {"portal_field_id": "estimatedValue",      "label": "Valeur estimee",      "section_id": "sec_object",    "data_type": "currency", "sap_source_hint": "TotalTargetAmount","required": true,"important": true},
+    {"portal_field_id": "currency",            "label": "Devise",              "section_id": "sec_object",    "data_type": "code",     "sap_source_hint": "DocumentCurrency","required": false,"important": false},
+    {"portal_field_id": "procedureType",       "label": "Type de procedure",   "section_id": "sec_procedure", "data_type": "text",     "sap_source_hint": "ProcedureType","required": true,"important": true},
+    {"portal_field_id": "lots",                "label": "Lots",                "section_id": "sec_lots",      "data_type": "text",     "sap_source_hint": "","required": false,"important": false},
+    {"portal_field_id": "awardCriteria",       "label": "Criteres d'attribution","section_id": "sec_award",   "data_type": "text",     "sap_source_hint": "","required": true,"important": true},
+    {"portal_field_id": "bidSubmission",       "label": "Date limite de remise des offres","section_id": "sec_dates","data_type": "datetime","sap_source_hint": "BidSubmissionDeadline","required": true,"important": true},
+    {"portal_field_id": "bidOpening",          "label": "Ouverture des plis",  "section_id": "sec_dates",     "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime","required": false,"important": false},
+    {"portal_field_id": "supplierRegDeadline", "label": "Date limite d'inscription","section_id": "sec_dates","data_type": "datetime", "sap_source_hint": "SupplierRegistrationDeadline","required": false,"important": true},
+    {"portal_field_id": "contractStart",       "label": "Debut du marche",     "section_id": "sec_dates",     "data_type": "date",     "sap_source_hint": "ContractValidityStart","required": false,"important": false},
+    {"portal_field_id": "contractEnd",         "label": "Fin du marche",       "section_id": "sec_dates",     "data_type": "date",     "sap_source_hint": "ContractValidityEnd","required": false,"important": false}
+  ],
+  "terminology": {},
+  "validation_weights_override": {}
+}

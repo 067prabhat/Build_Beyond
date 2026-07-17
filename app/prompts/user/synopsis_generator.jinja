@@ -1,0 +1,91 @@
+Generate a supplier-facing tender synopsis for the SAP PPS Sourcing Project below.
+
+# Target Portal
+
+- portal_name:        {{ template.portal_name }}
+- portal_country_code:{{ template.portal_country_code }}
+- standard:           {{ template.standard }}
+- date_format:        {{ template.date_format }}
+- currency_hint:      {{ template.currency_hint }}
+- target_language:    {{ target_language }}
+
+# Fixed Section Superset (MUST use exactly these sections, in this order)
+
+You MUST place every field into one of these section ids. Skip an optional
+section entirely if none of its fields have SAP data. NEVER invent a new section.
+
+{% for section in template.section_superset -%}
+- id="{{ section.id }}"  title="{{ section.title }}"  order={{ section.order }}  required={{ section.required }}
+{% endfor %}
+
+# Fixed Field List (MUST fill exactly these fields, in this order per section)
+
+Do NOT invent new fields. Use the exact `label` string given below. Fill `value`
+from the SAP field named in `sap_source_hint` (pipe-separated fallbacks). If the
+SAP value is empty, use "Not specified" translated into the target language.
+
+{% for f in template.fields -%}
+- id="{{ f.portal_field_id }}"  label="{{ f.label }}"  section="{{ f.section_id }}"  type={{ f.data_type }}  sap_hint="{{ f.sap_source_hint }}"  required={{ f.required }}  important={{ f.important }}
+{% endfor %}
+
+{% if template.terminology -%}
+# Portal Terminology (use in narrative text, NOT in labels)
+{% for k, v in template.terminology.items() -%}
+- {{ k }} => "{{ v }}"
+{% endfor %}
+{% endif %}
+
+# SAP Sourcing Project Data
+
+```json
+{{ tender_data_json }}
+```
+
+# Output Schema
+
+Return ONLY valid JSON with exactly these keys:
+
+```json
+{
+  "tenderTitle":          "<SourcingProjectName exactly as provided>",
+  "executiveSummary":     "<1-2 sentence supplier summary in {{ target_language }}>",
+  "portalName":           "{{ template.portal_name }}",
+  "portalCountryCode":    "{{ template.portal_country_code }}",
+  "portalComplianceNote": "<1-2 sentences in {{ target_language }} on compliance readiness>",
+  "supplierFields": [
+    {
+      "label":           "<exact label from template.fields[].label>",
+      "value":           "<SAP value; 'Not specified' in target language if empty>",
+      "sapSource":       "<SAP field name actually used>",
+      "sectionId":       "<one of the section ids listed above>",
+      "portalFieldId":   "<template.fields[].portal_field_id>",
+      "important":       <bool from template>
+    }
+  ],
+  "supplierActions": [
+    "<imperative action derived from SupplierRegistrationDeadline in {{ target_language }}>",
+    "<imperative action derived from BidSubmissionDeadline in {{ target_language }}>",
+    "<imperative action derived from BidOpeningDateTime in {{ target_language }}>"
+  ],
+  "portalMissingFields": [
+    { "label": "<template.fields[].label>", "reason": "<why required for {{ template.portal_name }}>" }
+  ],
+  "missingInformation": ["<empty SAP fields flagged for human review>"],
+  "sourceReferences":  ["<SAP field names actually used>"],
+  "language":          "{{ target_language }}",
+  "templateVersion":   "{{ template.version }}",
+  "templateHash":      "{{ template.template_hash }}"
+}
+```
+
+# Rules for supplierFields
+
+1. There must be one entry per field listed under "Fixed Field List" above.
+2. Order MUST match the order in the fixed list (section by section, following the section order).
+3. `label` MUST be the exact string from template - do not translate or reword.
+4. `sectionId` MUST be one of the section ids from the fixed superset.
+5. `portalFieldId` MUST be the portal_field_id from the template.
+6. If a required field has no SAP data, put "Not specified" in value AND add an entry to portalMissingFields.
+7. Skip fields for optional sections entirely when SAP data is empty (do NOT emit "Not specified" placeholders).
+
+Do NOT hallucinate. Use only values present in the SAP data.

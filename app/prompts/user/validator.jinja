@@ -1,0 +1,64 @@
+Grade the following synopsis against the 8-rule rubric.
+
+# Portal Context
+
+- portal_name:        {{ template.portal_name }}
+- portal_country_code:{{ template.portal_country_code }}
+- date_format:        {{ template.date_format }}
+- currency_hint:      {{ template.currency_hint }}
+- target_language:    {{ target_language }}
+
+# Effective Weights (already resolved from manifest + template override)
+
+{% for rule, w in effective_weights.items() -%}
+- {{ rule }}: {{ w }}
+{% endfor %}
+
+# Required Portal Fields (must be present or in portalMissingFields)
+
+{% for f in template.fields if f.required -%}
+- "{{ f.label }}"  (section={{ f.section_id }}, sap_hint="{{ f.sap_source_hint }}")
+{% endfor %}
+
+# Fixed Section Superset (must be exactly these titles)
+
+{% for s in template.section_superset -%}
+- "{{ s.title }}"  (id={{ s.id }}, order={{ s.order }}, required={{ s.required }})
+{% endfor %}
+
+# Original SAP Data
+
+```json
+{{ tender_data_json }}
+```
+
+# Generated Synopsis
+
+```json
+{{ synopsis_json }}
+```
+
+# Return this exact JSON shape
+
+```json
+{
+  "rule_scores": {
+    "date_format":        <0-100>,
+    "portal_labels":      <0-100>,
+    "data_accuracy":      <0-100>,
+    "completeness":       <0-100>,
+    "supplier_actions":   <0-100>,
+    "important_flags":    <0-100>,
+    "uniformity":         <0-100>,
+    "exec_summary_match": <0-100>
+  },
+  "critical_failures": ["<rule name if that CRITICAL rule scored < 50>", ...],
+  "issues": [
+    { "rule": "<rule name>", "detail": "<concrete evidence>" }
+  ],
+  "fixed_synopsis": <corrected synopsis JSON if fixable, else null>
+}
+```
+
+Do NOT compute a weighted average. The caller does that.
+Do NOT include markdown fences or prose outside the JSON.

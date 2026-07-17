@@ -22,3 +22,11 @@ spec:
     - name: pps-destination
       service: destination
       plan: lite
+    # v3.0 - SAP Agent Memory (E8)
+    # Provides:
+    #   - LangGraph checkpointer (replaces in-memory _state singleton)
+    #   - Semantic memories for approved synopses (few-shot learning)
+    #   - Messages for HITL feedback aggregation (drift detection)
+    - name: hana-agent-memory
+      service: hana-agent-memory
+      plan: standard

@@ -1,0 +1,43 @@
+{
+  "portal_country_code": "SA",
+  "portal_name": "Etimad / Monafasat (Saudi Arabia)",
+  "version": "SA-hardcoded-1.0.0",
+  "date_format": "DD/MM/YYYY",
+  "currency_hint": "SAR",
+  "default_language": "Arabic",
+  "standard": "NCAR (National Competitive Bidding)",
+  "section_superset": [
+    {"id": "sec_overview",    "title": "Tender Overview",            "order": 1, "required": true},
+    {"id": "sec_authority",   "title": "Procuring Entity",           "order": 2, "required": true},
+    {"id": "sec_commercial",  "title": "Value & Bonds",              "order": 3, "required": true},
+    {"id": "sec_dates",       "title": "Key Dates",                  "order": 4, "required": true},
+    {"id": "sec_eligibility", "title": "Eligibility (Nitaqat/GOSI)", "order": 5, "required": true}
+  ],
+  "fields": [
+    {"portal_field_id": "tenderNumber",     "label": "Tender Number",        "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ExternalReference|SourcingProject","required": true,  "important": true},
+    {"portal_field_id": "tenderTitle",      "label": "Tender Title",         "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "SourcingProjectName","required": true, "important": true},
+    {"portal_field_id": "tenderCategory",   "label": "Tender Category",      "section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "PurchasingCategory","required": true, "important": false},
+    {"portal_field_id": "procedureType",    "label": "Tender Procedure Type","section_id": "sec_overview",   "data_type": "text",     "sap_source_hint": "ProcedureType","required": true, "important": false},
+    {"portal_field_id": "procuringEntity",  "label": "Procuring Entity",     "section_id": "sec_authority",  "data_type": "text",     "sap_source_hint": "PurchasingOrganization","required": true, "important": true},
+    {"portal_field_id": "crNumber",         "label": "CR Number",            "section_id": "sec_authority",  "data_type": "code",     "sap_source_hint": "","required": false, "important": false},
+    {"portal_field_id": "estimatedValue",   "label": "Estimated Value",      "section_id": "sec_commercial", "data_type": "currency", "sap_source_hint": "TotalTargetAmount","required": true, "important": true},
+    {"portal_field_id": "currency",         "label": "Currency",             "section_id": "sec_commercial", "data_type": "code",     "sap_source_hint": "DocumentCurrency","required": true, "important": false},
+    {"portal_field_id": "performanceBond",  "label": "Performance Bond %",   "section_id": "sec_commercial", "data_type": "text",     "sap_source_hint": "","required": true, "important": true},
+    {"portal_field_id": "bidSubmission",    "label": "Bid Submission Deadline","section_id": "sec_dates",    "data_type": "datetime", "sap_source_hint": "BidSubmissionDeadline","required": true, "important": true},
+    {"portal_field_id": "bidOpening",       "label": "Bid Opening",          "section_id": "sec_dates",      "data_type": "datetime", "sap_source_hint": "BidOpeningDateTime","required": true, "important": true},
+    {"portal_field_id": "supplierRegDeadline","label": "Supplier Registration Deadline","section_id": "sec_dates","data_type": "datetime","sap_source_hint": "SupplierRegistrationDeadline","required": false, "important": true},
+    {"portal_field_id": "contractStart",    "label": "Contract Start",       "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityStart","required": false, "important": false},
+    {"portal_field_id": "contractEnd",      "label": "Contract End",         "section_id": "sec_dates",      "data_type": "date",     "sap_source_hint": "ContractValidityEnd","required": false, "important": false},
+    {"portal_field_id": "gosiCert",         "label": "GOSI Certificate Requirement","section_id": "sec_eligibility","data_type": "text","sap_source_hint": "","required": true, "important": true},
+    {"portal_field_id": "zakatCert",        "label": "Zakat Certificate",    "section_id": "sec_eligibility","data_type": "text",     "sap_source_hint": "","required": true, "important": false},
+    {"portal_field_id": "nitaqatPct",       "label": "Saudization Percentage (Nitaqat)","section_id": "sec_eligibility","data_type": "text","sap_source_hint": "","required": true, "important": true}
+  ],
+  "terminology": {
+    "procedureType":         "Tender Procedure Type",
+    "procuringEntity":       "Procuring Entity",
+    "bidSubmissionDeadline": "Bid Submission Deadline",
+    "tenderValue":           "Estimated Value",
+    "contractValidity":      "Contract Duration"
+  },
+  "validation_weights_override": {}
+}

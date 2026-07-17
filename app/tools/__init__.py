@@ -1,0 +1,1 @@
+"""Build-time helper tools (diagram rendering, snapshot generators, etc.)."""

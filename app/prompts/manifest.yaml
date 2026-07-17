@@ -1,0 +1,37 @@
+# Prompt Registry Manifest
+# Bump `version` whenever you change the corresponding .md/.jinja file.
+# Snapshot tests key on version + template_hash + SP data.
+
+prompts:
+
+  synopsis_generator:
+    system:      system/synopsis_generator.md
+    user:        user/synopsis_generator.jinja
+    version:     "3.0.0"
+    updated:     "2026-07-17"
+    owner:       "procurement-team"
+    max_tokens:  2000
+    temperature: 0.2
+    seed:        42
+
+  validator:
+    system:      system/validator.md
+    user:        user/validator.jinja
+    version:     "2.0.0"
+    updated:     "2026-07-17"
+    owner:       "quality-team"
+    max_tokens:  2500
+    temperature: 0.0        # deterministic scoring
+    seed:        42
+    # Weights sum to 100. Critical rules (see validator.py CRITICAL_RULES)
+    # cause hard-fail regeneration when their per-rule score is < 50, even
+    # if the weighted average is >= 70.
+    weights:
+      date_format:         15    # CRITICAL - wrong date = missed deadline
+      portal_labels:       10
+      data_accuracy:       20    # CRITICAL - hallucination = legal risk
+      completeness:        15    # CRITICAL - missing mandatory field = tender invalid
+      supplier_actions:    10
+      important_flags:     10
+      uniformity:          10
+      exec_summary_match:  10
